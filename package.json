@@ -6,7 +6,9 @@
     "start": "bunx rork start -p f5ow4xol7d1ev9dwgwpug --tunnel",
     "start-web": "bunx rork start -p f5ow4xol7d1ev9dwgwpug --web --tunnel",
     "start-web-dev": "DEBUG=expo* bunx rork start -p f5ow4xol7d1ev9dwgwpug --web --tunnel",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -32,7 +34,6 @@
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.6",
     "expo-web-browser": "^14.2.0",
-    "lucide-react-native": "^0.475.0",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-dom": "19.0.0",

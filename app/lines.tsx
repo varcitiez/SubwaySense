@@ -125,7 +125,7 @@ export default function LineListScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>SafeRoute MTA</Text>
+        <Text style={styles.title}>SubwaySense MTA</Text>
         <Text style={styles.subtitle}>NYC Subway Safety Tracker</Text>
       </View>
 

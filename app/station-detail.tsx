@@ -10,8 +10,8 @@ import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { TrainArrivals } from "@/components/TrainArrivals";
-
 import { LiveStationStatusComponent } from "@/components/LiveStationStatus";
+import { SafetyAlertsComponent } from "@/components/SafetyAlerts";
 import { useRealTime } from "@/contexts/RealTimeContext";
 import type { Station } from "@/types/mta";
 
@@ -114,6 +114,8 @@ export default function StationDetailScreen() {
         <TrainArrivals stationId={station.id} lineColor={lineColor} />
         
         <LiveStationStatusComponent stationId={station.id} lineIcons={lineIcons} />
+        
+        <SafetyAlertsComponent stationId={station.id} lineIcons={lineIcons} />
 
         <View style={styles.metricsSection}>
           <Text style={styles.sectionTitle}>Safety Metrics</Text>

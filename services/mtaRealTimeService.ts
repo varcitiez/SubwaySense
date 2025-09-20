@@ -1,17 +1,14 @@
 import type { TrainArrival, ServiceAlert, LiveStationStatus } from '@/types/mta';
 
 class MTARealTimeService {
-  private baseUrl = 'https://api.mta.info/mta-gtfs-realtime';
-  
   async getTrainArrivals(stationId: string): Promise<TrainArrival[]> {
     try {
       // Simulate real-time data for demo purposes
-      // In production, this would call the actual MTA API
       const mockArrivals: TrainArrival[] = [
         {
           trainId: '4-1234',
           line: '4',
-          direction: 'N',
+          direction: 'N' as const,
           minutesAway: Math.floor(Math.random() * 15) + 1,
           destination: 'Woodlawn - 161 St',
           isDelayed: Math.random() > 0.8
@@ -19,7 +16,7 @@ class MTARealTimeService {
         {
           trainId: '5-5678',
           line: '5',
-          direction: 'N',
+          direction: 'N' as const,
           minutesAway: Math.floor(Math.random() * 20) + 3,
           destination: 'Eastchester - Dyre Ave',
           isDelayed: Math.random() > 0.9
@@ -27,7 +24,7 @@ class MTARealTimeService {
         {
           trainId: '6-9012',
           line: '6',
-          direction: 'S',
+          direction: 'S' as const,
           minutesAway: Math.floor(Math.random() * 12) + 2,
           destination: 'Brooklyn Bridge - City Hall',
           isDelayed: false
@@ -49,7 +46,7 @@ class MTARealTimeService {
           id: 'alert-001',
           title: 'Service Change',
           description: '4/5/6 trains running with delays due to signal problems at 59 St',
-          severity: 'medium',
+          severity: 'medium' as const,
           affectedLines: ['4', '5', '6'],
           startTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
           isActive: true
@@ -58,7 +55,7 @@ class MTARealTimeService {
           id: 'alert-002',
           title: 'Weekend Service',
           description: 'L train not running between 8 Ave and Bedford Ave, shuttle buses provided',
-          severity: 'high',
+          severity: 'high' as const,
           affectedLines: ['L'],
           startTime: new Date().toISOString(),
           endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),

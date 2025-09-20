@@ -33,6 +33,16 @@
         {
           "origin": "https://rork.com/"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "This app needs access to location to show your position on the subway map.",
+          "locationAlwaysPermission": "This app needs access to location to show your position on the subway map.",
+          "locationWhenInUsePermission": "This app needs access to location to show your position on the subway map.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
+        }
       ]
     ],
     "experiments": {

@@ -164,43 +164,7 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
             {getCrowdingText(status.crowdingLevel)}
           </Text>
         </View>
-
-        <View style={styles.statusItem}>
-          <View style={styles.statusIcon}>
-            <Ionicons name="thermometer" size={24} color="#007AFF" />
-          </View>
-          <Text style={styles.statusLabel}>Temperature</Text>
-          <Text style={styles.statusValue}>{status.temperature}°F</Text>
-        </View>
-
-        <View style={styles.statusItem}>
-          <View style={styles.statusIcon}>
-            <Ionicons name="arrow-up" size={24} color={getStatusColor(status.elevatorStatus)} />
-          </View>
-          <Text style={styles.statusLabel}>Elevator</Text>
-          <Text style={[styles.statusValue, { color: getStatusColor(status.elevatorStatus) }]}>
-            {getStatusText(status.elevatorStatus)}
-          </Text>
-        </View>
-
-        <View style={styles.statusItem}>
-          <View style={styles.statusIcon}>
-            <Ionicons name="trending-up" size={24} color={getStatusColor(status.escalatorStatus)} />
-          </View>
-          <Text style={styles.statusLabel}>Escalator</Text>
-          <Text style={[styles.statusValue, { color: getStatusColor(status.escalatorStatus) }]}>
-            {getStatusText(status.escalatorStatus)}
-          </Text>
-        </View>
       </View>
-
-      {(status.elevatorStatus === 'out-of-service' || status.escalatorStatus === 'out-of-service') && (
-        <View style={styles.accessibilityAlert}>
-          <Text style={styles.accessibilityText}>
-            ⚠️ Accessibility equipment is currently out of service
-          </Text>
-        </View>
-      )}
     </View>
   );
 }

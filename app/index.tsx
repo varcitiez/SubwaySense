@@ -13,6 +13,9 @@ import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useRealTime } from "@/contexts/RealTimeContext";
+import { useLocation } from "@/contexts/LocationContext";
+import { HARDCODED_MTA_DATA } from "@/constants/mtaData";
+import { findClosestStation } from "@/utils/stationUtils";
 
 
 export default function HomeScreen() {
@@ -21,7 +24,9 @@ export default function HomeScreen() {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const scrollViewRef = useRef<ScrollView>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [closestStation, setClosestStation] = useState<{ station: { id: string; stationName: string }; distance: number } | null>(null);
   const { isOnline, lastUpdated } = useRealTime();
+  const { location, isLoading: locationLoading, requestLocation, hasPermission } = useLocation();
 
   const handleSafetyPress = () => {
     router.push("/lines");
@@ -42,6 +47,44 @@ export default function HomeScreen() {
     scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: true });
   };
 
+  const handleGetLocation = async () => {
+    console.log('Location button pressed');
+    console.log('hasPermission:', hasPermission);
+    console.log('locationLoading:', locationLoading);
+    
+    if (!hasPermission) {
+      console.log('Requesting location permission...');
+      await requestLocation();
+    } else {
+      console.log('Requesting fresh location..');
+      await requestLocation();
+    }
+  };
+
+  // Find closest station when location changes
+  React.useEffect(() => {
+    if (location) {
+      console.log('Location updated, finding closest station...');
+      
+      // Get all stations from the MTA data
+      const allStations = HARDCODED_MTA_DATA.lines.flatMap(line => 
+        line.stations.map(station => ({
+          id: station.id,
+          stationName: station.stationName
+        }))
+      );
+      
+      const closest = findClosestStation(location.latitude, location.longitude, allStations);
+      setClosestStation(closest);
+      
+      if (closest) {
+        console.log(`Closest station: ${closest.station.stationName} (${closest.distance.toFixed(2)} km away)`);
+      } else {
+        console.log('No closest station found');
+      }
+    }
+  }, [location]);
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" translucent />
@@ -49,7 +92,7 @@ export default function HomeScreen() {
       {/* Header with Safety Button */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.appTitle}>SafeRoute</Text>
+          <Text style={styles.appTitle}>SubwaySense</Text>
           <Text style={styles.appSubtitle}>NYC Subway Map</Text>
         </View>
         <TouchableOpacity 
@@ -58,7 +101,7 @@ export default function HomeScreen() {
           testID="safety-button"
         >
           <Text style={styles.cautionIcon}>⚠️</Text>
-          <Text style={styles.safetyButtonText}>Safety</Text>
+          <Text style={styles.safetyButtonText}>View Lines</Text>
         </TouchableOpacity>
       </View>
 
@@ -72,6 +115,13 @@ export default function HomeScreen() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.resetButton} onPress={handleResetZoom}>
           <Text style={styles.resetButtonText}>Reset</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.locationButton, { opacity: locationLoading ? 0.5 : 1 }]} 
+          onPress={handleGetLocation}
+          disabled={locationLoading}
+        >
+          <Text style={styles.locationButtonText}>📍</Text>
         </TouchableOpacity>
       </View>
 
@@ -110,7 +160,14 @@ export default function HomeScreen() {
       {/* Bottom Info */}
       <View style={[styles.bottomInfo, { paddingBottom: insets.bottom + 16 }]}>
         <View style={styles.statusRow}>
-          <Text style={styles.infoText}>Tap the Safety button to view station safety information</Text>
+          <Text style={styles.infoText}>
+            {closestStation 
+              ? `Closest station: ${closestStation.station.stationName} (${closestStation.distance.toFixed(1)} km away)`
+              : location 
+                ? 'Finding closest station...' 
+                : 'Tap 📍 to find your closest subway station'
+            }
+          </Text>
           <View style={styles.connectionStatus}>
             <View style={[styles.statusDot, { backgroundColor: isOnline ? '#34C759' : '#FF3B30' }]} />
             <Text style={styles.statusText}>
@@ -182,8 +239,8 @@ const styles = StyleSheet.create({
   },
   zoomControls: {
     position: "absolute",
-    top: 120,
-    right: 20,
+    top: 150,
+    right: 5,
     zIndex: 10,
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     borderRadius: 12,
@@ -215,6 +272,18 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "600",
+  },
+  locationButton: {
+    width: 44,
+    height: 44,
+    backgroundColor: "rgba(0, 122, 255, 0.8)",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  locationButtonText: {
+    fontSize: 20,
   },
   mapContainer: {
     flex: 1,

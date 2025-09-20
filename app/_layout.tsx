@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StyleSheet } from "react-native";
 import { RealTimeProvider } from "@/contexts/RealTimeContext";
+import { LocationProvider } from "@/contexts/LocationContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -64,9 +65,11 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <RealTimeProvider>
-        <GestureHandlerRootView style={styles.container}>
-          <RootLayoutNav />
-        </GestureHandlerRootView>
+        <LocationProvider>
+          <GestureHandlerRootView style={styles.container}>
+            <RootLayoutNav />
+          </GestureHandlerRootView>
+        </LocationProvider>
       </RealTimeProvider>
     </QueryClientProvider>
   );

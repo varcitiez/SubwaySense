@@ -50,7 +50,7 @@ export default function StationListScreen() {
         <Text style={[styles.score, { color: getScoreColor(item.overallScore) }]}>
           {item.overallScore}
         </Text>
-        <Text style={styles.scoreLabel}>/ 10</Text>
+        <Text style={styles.scoreLabel}>/ 10 Safety Rating</Text>
         <Ionicons name="chevron-forward" color="#8E8E93" size={20} style={styles.chevron} />
       </View>
     </TouchableOpacity>
