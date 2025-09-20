@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { RefreshCw } from "lucide-react-native";
+
 import { TrainArrivals } from "@/components/TrainArrivals";
 
 import { LiveStationStatusComponent } from "@/components/LiveStationStatus";
@@ -85,7 +85,8 @@ export default function StationDetailScreen() {
               disabled={isLoading}
               style={styles.headerButton}
             >
-              <RefreshCw 
+              <Ionicons 
+                name="refresh" 
                 size={20} 
                 color={isLoading ? "#8E8E93" : "#FFFFFF"}
                 style={isLoading ? styles.spinning : undefined}

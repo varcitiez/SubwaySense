@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { AlertTriangle, Info, AlertCircle } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRealTime } from '@/contexts/RealTimeContext';
 import type { ServiceAlert } from '@/types/mta';
 
@@ -23,13 +23,13 @@ export function ServiceAlerts({ affectedLines, embedded = false }: ServiceAlerts
     
     switch (severity) {
       case 'high':
-        return <AlertTriangle {...iconProps} color="#FF3B30" />;
+        return <Ionicons name="warning" {...iconProps} color="#FF3B30" />;
       case 'medium':
-        return <AlertCircle {...iconProps} color="#FF9500" />;
+        return <Ionicons name="alert-circle" {...iconProps} color="#FF9500" />;
       case 'low':
-        return <Info {...iconProps} color="#007AFF" />;
+        return <Ionicons name="information-circle" {...iconProps} color="#007AFF" />;
       default:
-        return <Info {...iconProps} color="#8E8E93" />;
+        return <Ionicons name="information-circle" {...iconProps} color="#8E8E93" />;
     }
   };
 
@@ -62,7 +62,7 @@ export function ServiceAlerts({ affectedLines, embedded = false }: ServiceAlerts
     return (
       <View style={[styles.container, embedded && styles.embeddedContainer]}>
         <View style={styles.header}>
-          <Info size={20} color="#34C759" />
+          <Ionicons name="information-circle" size={20} color="#34C759" />
           <Text style={styles.title}>Service Status</Text>
         </View>
         <View style={styles.noAlertsContainer}>
@@ -76,7 +76,7 @@ export function ServiceAlerts({ affectedLines, embedded = false }: ServiceAlerts
   return (
     <View style={[styles.container, embedded && styles.embeddedContainer]}>
       <View style={styles.header}>
-        <AlertTriangle size={20} color="#FF9500" />
+        <Ionicons name="warning" size={20} color="#FF9500" />
         <Text style={styles.title}>Service Alerts</Text>
         <View style={styles.alertCount}>
           <Text style={styles.alertCountText}>{filteredAlerts.length}</Text>

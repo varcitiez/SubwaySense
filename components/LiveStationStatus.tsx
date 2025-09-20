@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Thermometer, Users, Heater, ArrowUp, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRealTime } from '@/contexts/RealTimeContext';
 import { ServiceAlerts } from '@/components/ServiceAlerts';
 import type { LiveStationStatus } from '@/types/mta';
@@ -67,18 +67,18 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Users size={20} color="#FFFFFF" />
+          <Ionicons name="people" size={20} color="#FFFFFF" />
           <Text style={styles.title}>Live Station Status</Text>
           <TouchableOpacity 
             style={styles.alertsButton}
             onPress={() => setShowServiceAlerts(!showServiceAlerts)}
           >
-            <AlertTriangle size={16} color="#FF9500" />
+            <Ionicons name="warning" size={16} color="#FF9500" />
             <Text style={styles.alertsButtonText}>Alerts</Text>
             {showServiceAlerts ? (
-              <ChevronUp size={16} color="#8E8E93" />
+              <Ionicons name="chevron-up" size={16} color="#8E8E93" />
             ) : (
-              <ChevronDown size={16} color="#8E8E93" />
+              <Ionicons name="chevron-down" size={16} color="#8E8E93" />
             )}
           </TouchableOpacity>
         </View>
@@ -97,18 +97,18 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Users size={20} color="#FFFFFF" />
+          <Ionicons name="people" size={20} color="#FFFFFF" />
           <Text style={styles.title}>Live Station Status</Text>
           <TouchableOpacity 
             style={styles.alertsButton}
             onPress={() => setShowServiceAlerts(!showServiceAlerts)}
           >
-            <AlertTriangle size={16} color="#FF9500" />
+            <Ionicons name="warning" size={16} color="#FF9500" />
             <Text style={styles.alertsButtonText}>Alerts</Text>
             {showServiceAlerts ? (
-              <ChevronUp size={16} color="#8E8E93" />
+              <Ionicons name="chevron-up" size={16} color="#8E8E93" />
             ) : (
-              <ChevronDown size={16} color="#8E8E93" />
+              <Ionicons name="chevron-down" size={16} color="#8E8E93" />
             )}
           </TouchableOpacity>
         </View>
@@ -129,18 +129,18 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Users size={20} color="#FFFFFF" />
+        <Ionicons name="people" size={20} color="#FFFFFF" />
         <Text style={styles.title}>Live Station Status</Text>
         <TouchableOpacity 
           style={styles.alertsButton}
           onPress={() => setShowServiceAlerts(!showServiceAlerts)}
         >
-          <AlertTriangle size={16} color="#FF9500" />
+          <Ionicons name="warning" size={16} color="#FF9500" />
           <Text style={styles.alertsButtonText}>Alerts</Text>
           {showServiceAlerts ? (
-            <ChevronUp size={16} color="#8E8E93" />
+            <Ionicons name="chevron-up" size={16} color="#8E8E93" />
           ) : (
-            <ChevronDown size={16} color="#8E8E93" />
+            <Ionicons name="chevron-down" size={16} color="#8E8E93" />
           )}
         </TouchableOpacity>
       </View>
@@ -157,7 +157,7 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
       <View style={styles.statusGrid}>
         <View style={styles.statusItem}>
           <View style={styles.statusIcon}>
-            <Users size={24} color={getCrowdingColor(status.crowdingLevel)} />
+            <Ionicons name="people" size={24} color={getCrowdingColor(status.crowdingLevel)} />
           </View>
           <Text style={styles.statusLabel}>Crowding</Text>
           <Text style={[styles.statusValue, { color: getCrowdingColor(status.crowdingLevel) }]}>
@@ -167,7 +167,7 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
 
         <View style={styles.statusItem}>
           <View style={styles.statusIcon}>
-            <Thermometer size={24} color="#007AFF" />
+            <Ionicons name="thermometer" size={24} color="#007AFF" />
           </View>
           <Text style={styles.statusLabel}>Temperature</Text>
           <Text style={styles.statusValue}>{status.temperature}°F</Text>
@@ -175,7 +175,7 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
 
         <View style={styles.statusItem}>
           <View style={styles.statusIcon}>
-            <Heater size={24} color={getStatusColor(status.elevatorStatus)} />
+            <Ionicons name="arrow-up" size={24} color={getStatusColor(status.elevatorStatus)} />
           </View>
           <Text style={styles.statusLabel}>Elevator</Text>
           <Text style={[styles.statusValue, { color: getStatusColor(status.elevatorStatus) }]}>
@@ -185,7 +185,7 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
 
         <View style={styles.statusItem}>
           <View style={styles.statusIcon}>
-            <ArrowUp size={24} color={getStatusColor(status.escalatorStatus)} />
+            <Ionicons name="trending-up" size={24} color={getStatusColor(status.escalatorStatus)} />
           </View>
           <Text style={styles.statusLabel}>Escalator</Text>
           <Text style={[styles.statusValue, { color: getStatusColor(status.escalatorStatus) }]}>

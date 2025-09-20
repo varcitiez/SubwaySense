@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Clock, RefreshCw, Wifi, WifiOff } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRealTime } from '@/contexts/RealTimeContext';
 import type { TrainArrival } from '@/types/mta';
 
@@ -64,13 +64,13 @@ export function TrainArrivals({ stationId, lineColor }: TrainArrivalsProps) {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Clock size={20} color="#FFFFFF" />
+          <Ionicons name="time-outline" size={20} color="#FFFFFF" />
           <Text style={styles.title}>Live Arrivals</Text>
           <View style={styles.statusIndicator}>
             {isOnline ? (
-              <Wifi size={16} color="#34C759" />
+              <Ionicons name="wifi" size={16} color="#34C759" />
             ) : (
-              <WifiOff size={16} color="#FF3B30" />
+              <Ionicons name="wifi-outline" size={16} color="#FF3B30" />
             )}
           </View>
         </View>
@@ -82,7 +82,8 @@ export function TrainArrivals({ stationId, lineColor }: TrainArrivalsProps) {
             onPress={fetchArrivals}
             disabled={isLoading}
           >
-            <RefreshCw 
+            <Ionicons 
+              name="refresh" 
               size={16} 
               color={isLoading ? "#8E8E93" : "#007AFF"} 
               style={isLoading ? styles.spinning : undefined}
