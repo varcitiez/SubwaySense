@@ -1,0 +1,3 @@
+[submodule "subway_sense"]
+    path = subway_sense
+    url = https://github.com/Aurumish/subway_sense/tree/main
