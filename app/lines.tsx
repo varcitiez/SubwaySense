@@ -12,13 +12,13 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import type { MTAData, Line, Station } from "@/types/mta";
-import { HARDCODED_MTA_DATA } from "@/constants/mtaData";
+// import { HARDCODED_MTA_DATA } from "@/constants/mtaData"; // Removed - using Transiter data only
 import { transiterRouteService } from "@/services/transiterRouteService";
 
 export default function LineListScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [data, setData] = useState<MTAData | null>(HARDCODED_MTA_DATA);
+  const [data, setData] = useState<MTAData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,13 +36,13 @@ export default function LineListScreen() {
           console.log(`✅ Successfully loaded ${transiterLines.length} lines with stations from Transiter`);
           setData({ lines: transiterLines });
         } else {
-          console.log('⚠️ No Transiter data, using hardcoded fallback');
-          setData(HARDCODED_MTA_DATA);
+          console.log('⚠️ No Transiter data available');
+          setData(null);
         }
       } catch (error) {
         console.error('❌ Failed to fetch Transiter data:', error);
         setError('Failed to load real-time data');
-        setData(HARDCODED_MTA_DATA); // Fallback to hardcoded
+        setData(null); // No fallback data
       } finally {
         setIsLoading(false);
       }
@@ -55,15 +55,21 @@ export default function LineListScreen() {
     if (!data || !searchQuery.trim()) return null;
 
     const results: { station: Station; line: Line }[] = [];
+    const stationIds = new Set<string>(); // Track seen station IDs to avoid duplicates
     
     data.lines.forEach((line) => {
       line.stations.forEach((station) => {
         if (station.stationName.toLowerCase().includes(searchQuery.toLowerCase())) {
-          results.push({ station, line });
+          // Only add if we haven't seen this station ID before
+          if (!stationIds.has(station.id)) {
+            stationIds.add(station.id);
+            results.push({ station, line });
+          }
         }
       });
     });
 
+    console.log(`🔍 Search for "${searchQuery}" found ${results.length} unique stations`);
     return results;
   }, [data, searchQuery]);
 
@@ -195,7 +201,7 @@ export default function LineListScreen() {
         <FlatList
           data={searchResults}
           renderItem={renderSearchItem}
-          keyExtractor={(item) => item.station.id}
+          keyExtractor={(item) => `${item.station.id}-${item.line.lineName}`}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
@@ -208,7 +214,7 @@ export default function LineListScreen() {
         <FlatList
           data={data?.lines || []}
           renderItem={renderLineItem}
-          keyExtractor={(item) => item.lineName}
+          keyExtractor={(item, index) => `${item.lineIcons[0]}-${index}`}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />

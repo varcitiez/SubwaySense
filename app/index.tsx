@@ -14,8 +14,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useRealTime } from "@/contexts/RealTimeContext";
 import { useLocation } from "@/contexts/LocationContext";
-import { HARDCODED_MTA_DATA } from "@/constants/mtaData";
 import { findClosestStation } from "@/utils/stationUtils";
+import { transiterRouteService } from "@/services/transiterRouteService";
+import type { Line } from "@/types/mta";
 
 
 export default function HomeScreen() {
@@ -25,6 +26,8 @@ export default function HomeScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [closestStation, setClosestStation] = useState<{ station: { id: string; stationName: string }; distance: number } | null>(null);
+  const [transiterLines, setTransiterLines] = useState<Line[]>([]);
+  const [isLoadingTransiter, setIsLoadingTransiter] = useState<boolean>(false);
   const { isOnline, lastUpdated } = useRealTime();
   const { location, isLoading: locationLoading, requestLocation, hasPermission } = useLocation();
 
@@ -61,29 +64,58 @@ export default function HomeScreen() {
     }
   };
 
+  // Load Transiter data on component mount
+  React.useEffect(() => {
+    const loadTransiterData = async () => {
+      setIsLoadingTransiter(true);
+      try {
+        console.log('🚇 Loading Transiter data for closest station lookup...');
+        const lines = await transiterRouteService.getAllRoutesWithStations();
+        setTransiterLines(lines);
+        console.log(`✅ Loaded ${lines.length} Transiter lines with stations`);
+      } catch (error) {
+        console.error('❌ Failed to load Transiter data:', error);
+        // Fallback to empty array, will use hardcoded data
+        setTransiterLines([]);
+      } finally {
+        setIsLoadingTransiter(false);
+      }
+    };
+
+    loadTransiterData();
+  }, []);
+
   // Find closest station when location changes
   React.useEffect(() => {
-    if (location) {
+    if (location && !isLoadingTransiter) {
       console.log('Location updated, finding closest station...');
       
-      // Get all stations from the MTA data
-      const allStations = HARDCODED_MTA_DATA.lines.flatMap(line => 
-        line.stations.map(station => ({
-          id: station.id,
-          stationName: station.stationName
-        }))
-      );
-      
-      const closest = findClosestStation(location.latitude, location.longitude, allStations);
-      setClosestStation(closest);
-      
-      if (closest) {
-        console.log(`Closest station: ${closest.station.stationName} (${closest.distance.toFixed(2)} km away)`);
+      // Use Transiter data for closest station lookup
+      if (transiterLines.length > 0) {
+        console.log('📍 Using Transiter data for closest station lookup');
+        const allStations = transiterLines.flatMap(line => 
+          line.stations.map(station => ({
+            id: station.id,
+            stationName: station.stationName
+          }))
+        );
+        
+        console.log(`📍 Searching among ${allStations.length} stations for closest match`);
+        
+        const closest = findClosestStation(location.latitude, location.longitude, allStations);
+        setClosestStation(closest);
+        
+        if (closest) {
+          console.log(`✅ Closest station: ${closest.station.stationName} (${closest.distance.toFixed(2)} km away)`);
+        } else {
+          console.log('❌ No closest station found');
+        }
       } else {
-        console.log('No closest station found');
+        console.log('📍 No Transiter data available yet, waiting for data to load...');
+        setClosestStation(null);
       }
     }
-  }, [location]);
+  }, [location, transiterLines, isLoadingTransiter]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -163,7 +195,9 @@ export default function HomeScreen() {
             {closestStation 
               ? `Closest station: ${closestStation.station.stationName} (${closestStation.distance.toFixed(1)} km away)`
               : location 
-                ? 'Finding closest station...' 
+                ? isLoadingTransiter 
+                  ? 'Loading station data...' 
+                  : 'Finding closest station...' 
                 : 'Tap 📍 to find your closest subway station'
             }
           </Text>

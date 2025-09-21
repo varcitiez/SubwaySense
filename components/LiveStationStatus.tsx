@@ -3,25 +3,40 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRealTime } from '@/contexts/RealTimeContext';
 import { ServiceAlerts } from '@/components/ServiceAlerts';
+import { mlTrafficService } from '@/services/mlTrafficService';
 import type { LiveStationStatus } from '@/types/mta';
 
 interface LiveStationStatusProps {
   stationId: string;
   lineIcons?: string[];
+  stationName?: string;
 }
 
-export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStationStatusProps) {
+export function LiveStationStatusComponent({ stationId, lineIcons, stationName }: LiveStationStatusProps) {
   const { getStationStatus } = useRealTime();
   const [status, setStatus] = useState<LiveStationStatus | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showServiceAlerts, setShowServiceAlerts] = useState<boolean>(false);
+  const [mlBusyness, setMlBusyness] = useState<{
+    trafficPrediction: number | null;
+    busynessLevel: any | null;
+    isMLData: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const fetchStatus = async () => {
       setIsLoading(true);
       try {
+        // Fetch regular status data
         const data = await getStationStatus(stationId);
         setStatus(data);
+
+        // Fetch ML busyness prediction if station name is available
+        if (stationName) {
+          console.log(`🤖 Fetching ML busyness for ${stationName}...`);
+          const busynessData = await mlTrafficService.getCurrentBusyness(stationName);
+          setMlBusyness(busynessData);
+        }
       } catch (error) {
         console.error('Failed to fetch station status:', error);
       } finally {
@@ -33,7 +48,7 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
     
     const interval = setInterval(fetchStatus, 60000);
     return () => clearInterval(interval);
-  }, [stationId, getStationStatus]);
+  }, [stationId, stationName, getStationStatus]);
 
   const getCrowdingColor = (level: LiveStationStatus['crowdingLevel']): string => {
     switch (level) {
@@ -136,7 +151,7 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
           onPress={() => setShowServiceAlerts(!showServiceAlerts)}
         >
           <Ionicons name="warning" size={16} color="#FF9500" />
-          <Text style={styles.alertsButtonText}>Alerts</Text>
+          <Text style={styles.alertsButtonText}>Service Alerts</Text>
           {showServiceAlerts ? (
             <Ionicons name="chevron-up" size={16} color="#8E8E93" />
           ) : (
@@ -155,15 +170,28 @@ export function LiveStationStatusComponent({ stationId, lineIcons }: LiveStation
       )}
 
       <View style={styles.statusGrid}>
-        <View style={styles.statusItem}>
-          <View style={styles.statusIcon}>
-            <Ionicons name="people" size={24} color={getCrowdingColor(status.crowdingLevel)} />
+        
+
+        {/* ML Traffic Prediction */}
+        {mlBusyness && mlBusyness.isMLData && mlBusyness.busynessLevel && (
+          <View style={styles.statusItem}>
+            <View style={styles.statusIcon}>
+              <Ionicons name="analytics" size={24} color={mlBusyness.busynessLevel.color} />
+            </View>
+            <Text style={styles.statusLabel}>ML Busyness Prediction</Text>
+            <Text style={[styles.statusValue, { color: mlBusyness.busynessLevel.color }]}>
+              {mlBusyness.busynessLevel.category}
+            </Text>
+            <Text style={styles.statusSubtext}>
+              {mlBusyness.busynessLevel.description}
+            </Text>
+            {mlBusyness.trafficPrediction && (
+              <Text style={styles.statusSubtext}>
+                Traffic: {mlBusyness.trafficPrediction.toFixed(0)}
+              </Text>
+            )}
           </View>
-          <Text style={styles.statusLabel}>Crowding</Text>
-          <Text style={[styles.statusValue, { color: getCrowdingColor(status.crowdingLevel) }]}>
-            {getCrowdingText(status.crowdingLevel)}
-          </Text>
-        </View>
+        )}
       </View>
     </View>
   );
@@ -241,7 +269,7 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     color: '#8E8E93',
-    fontSize: 12,
+    fontSize: 16,
     marginBottom: 4,
     textAlign: 'center',
   },
@@ -250,6 +278,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  statusSubtext: {
+    color: '#8E8E93',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 2,
   },
   accessibilityAlert: {
     backgroundColor: '#FF9500',

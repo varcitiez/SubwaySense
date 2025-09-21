@@ -138,7 +138,11 @@ export default function StationDetailScreen() {
 
         <TrainArrivals stationId={station.id} lineColor={lineColor} />
         
-        <LiveStationStatusComponent stationId={station.id} lineIcons={lineIcons} />
+        <LiveStationStatusComponent 
+          stationId={station.id} 
+          lineIcons={lineIcons} 
+          stationName={station.stationName}
+        />
         
         <SafetyAlertsComponent 
           stationId={station.id} 
@@ -220,7 +224,7 @@ export default function StationDetailScreen() {
           </View>
         )}
 
-        <View style={styles.metricsSection}>
+        {/* <View style={styles.metricsSection}>
           <Text style={styles.sectionTitle}>Safety Metrics</Text>
           
           {Object.entries(station.metrics).map(([key, value]) => (
@@ -234,7 +238,7 @@ export default function StationDetailScreen() {
               </Text>
             </View>
           ))}
-        </View>
+        </View> */}
 
         <View style={styles.infoSection}>
           <Text style={styles.sectionTitle}>Station Information</Text>

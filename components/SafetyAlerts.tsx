@@ -140,6 +140,8 @@ export function SafetyAlertsComponent({ stationId, lineIcons, stationName }: Saf
           )}
         </TouchableOpacity>
       </View>
+      
+      <Text style={styles.updateTime}> 24hr history</Text>
 
       {flaskError && (
         <View style={styles.errorContainer}>
@@ -371,5 +373,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     opacity: 0.8,
+  },
+  updateTime: {
+    fontSize: 12,
+    color: '#8E8E93',
+    marginBottom: 15,
   },
 });

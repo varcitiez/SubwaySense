@@ -31,14 +31,14 @@ function RootLayoutNav() {
       <Stack.Screen 
         name="index" 
         options={{ 
-          title: "SafeRoute MTA",
+          title: "SubwaySense MTA",
           headerShown: false 
         }} 
       />
       <Stack.Screen 
         name="lines" 
         options={{ 
-          title: "SafeRoute MTA" 
+          title: "SubwaySense MTA" 
         }} 
       />
       <Stack.Screen 
