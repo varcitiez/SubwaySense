@@ -249,16 +249,13 @@ expo build:web
 - Implement proper error handling
 - Add comprehensive comments for complex logic
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
-- **MTA**: For providing the NYC Subway system and data
+- **MTA and NYCOpenData**: For providing the NYC Subway system and data
 - **Expo**: For the excellent development platform
 - **React Native Community**: For the robust ecosystem
 - **NYC Subway Riders**: For inspiration and feedback
+- **NYPD and New York Post**: For their timely updates.
 
 ## 📞 Support
 
@@ -279,3 +276,4 @@ For support, questions, or feature requests, please:
 ---
 
 **SubwaySense** - Making NYC Subway navigation safer and smarter! 🚇✨
+
