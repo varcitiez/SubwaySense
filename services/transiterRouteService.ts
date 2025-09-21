@@ -170,11 +170,13 @@ class TransiterRouteService {
             if (stationIds.has(stop.id)) continue;
             stationIds.add(stop.id);
 
-            // Create station object
+            // Create station object (ML scores will be fetched when station is clicked)
             const station: Station = {
               id: stop.id,
               stationName: stop.name,
-              overallScore: this.generateSafetyScore(stop.name),
+              busynessScore: this.generateBusynessScore(stop.name), // Fallback score
+              crimeScore: this.generateCrimeScore(stop.name),
+              overallScore: this.generateOverallScore(stop.name),
               metrics: this.generateMockMetrics(stop.name),
               coordinates: stop.latitude && stop.longitude ? {
                 latitude: stop.latitude,
@@ -204,9 +206,9 @@ class TransiterRouteService {
   }
 
   /**
-   * Generate a mock safety score for a station
+   * Generate a mock busyness score for a station (will be replaced with ML)
    */
-  private generateSafetyScore(stationName: string): number {
+  private generateBusynessScore(stationName: string): number {
     // Simple hash-based scoring to make it consistent
     let hash = 0;
     for (let i = 0; i < stationName.length; i++) {
@@ -214,6 +216,39 @@ class TransiterRouteService {
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
+    return Math.abs(hash) % 4 + 6; // Score between 6-10
+  }
+
+  /**
+   * Generate a mock crime score for a station (will be replaced with ML)
+   */
+  private generateCrimeScore(stationName: string): number {
+    // Simple hash-based scoring to make it consistent
+    let hash = 0;
+    for (let i = 0; i < stationName.length; i++) {
+      const char = stationName.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    // Use different seed for crime score
+    hash = hash + 12345;
+    return Math.abs(hash) % 4 + 6; // Score between 6-10
+  }
+
+  /**
+   * Generate an overall safety score (will be calculated from other scores)
+   */
+  private generateOverallScore(stationName: string): number {
+    // For now, simple hash-based scoring
+    // Later this will be calculated from busyness and crime scores
+    let hash = 0;
+    for (let i = 0; i < stationName.length; i++) {
+      const char = stationName.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    // Use different seed for overall score
+    hash = hash + 54321;
     return Math.abs(hash) % 4 + 6; // Score between 6-10
   }
 

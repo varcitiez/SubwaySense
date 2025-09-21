@@ -113,7 +113,7 @@ export default function LineListScreen() {
     <TouchableOpacity
       style={styles.searchItem}
       onPress={() => {
-        router.push({
+        router.replace({
           pathname: "/station-detail",
           params: { 
             station: JSON.stringify(item.station),

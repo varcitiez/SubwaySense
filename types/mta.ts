@@ -37,6 +37,8 @@ export interface LiveStationStatus {
 export interface Station {
   stationName: string;
   id: string;
+  busynessScore: number;
+  crimeScore: number;
   overallScore: number;
   metrics: Metrics;
   arrivals?: TrainArrival[];

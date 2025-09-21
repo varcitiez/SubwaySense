@@ -31,7 +31,7 @@ export default function StationListScreen() {
     <TouchableOpacity
       style={styles.stationItem}
       onPress={() => {
-        router.push({
+        router.replace({
           pathname: "/station-detail",
           params: { 
             station: JSON.stringify(item),

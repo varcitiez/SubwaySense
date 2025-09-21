@@ -14,6 +14,7 @@ import { LiveStationStatusComponent } from "@/components/LiveStationStatus";
 import { SafetyAlertsComponent } from "@/components/SafetyAlerts";
 import { useRealTime } from "@/contexts/RealTimeContext";
 import { transiterStationService } from "@/services/transiterStationService";
+import { mlTrafficService } from "@/services/mlTrafficService";
 import type { Station } from "@/types/mta";
 
 export default function StationDetailScreen() {
@@ -21,6 +22,8 @@ export default function StationDetailScreen() {
   const { refreshData, isLoading, isOnline } = useRealTime();
   const [enhancedStationData, setEnhancedStationData] = useState<any>(null);
   const [isLoadingEnhanced, setIsLoadingEnhanced] = useState<boolean>(false);
+  const [mlBusynessScore, setMlBusynessScore] = useState<number | null>(null);
+  const [isLoadingMlScores, setIsLoadingMlScores] = useState<boolean>(false);
   
   const station: Station = params.station 
     ? JSON.parse(params.station as string) 
@@ -49,6 +52,28 @@ export default function StationDetailScreen() {
 
     fetchEnhancedData();
   }, [station?.id]);
+
+  // Fetch ML busyness score when station is loaded
+  useEffect(() => {
+    const fetchMlScores = async () => {
+      if (!station?.stationName) return;
+      
+      setIsLoadingMlScores(true);
+      try {
+        console.log(`🤖 Fetching ML busyness score for ${station.stationName}...`);
+        const mlScore = await mlTrafficService.getBusynessScore(station.stationName);
+        setMlBusynessScore(mlScore);
+        console.log(`✅ ML busyness score loaded: ${mlScore}/10`);
+      } catch (error) {
+        console.error('❌ Failed to fetch ML busyness score:', error);
+        setMlBusynessScore(null);
+      } finally {
+        setIsLoadingMlScores(false);
+      }
+    };
+
+    fetchMlScores();
+  }, [station?.stationName]);
 
   if (!station) {
     return (
@@ -127,13 +152,46 @@ export default function StationDetailScreen() {
           </View>
         )}
 
-        <View style={styles.scoreSection}>
-          <View style={[styles.lineIndicator, { backgroundColor: lineColor }]} />
-          <Text style={styles.scoreLabel}>Overall Safety Score</Text>
-          <Text style={[styles.score, { color: getScoreColor(station.overallScore) }]}>
-            {station.overallScore}
-          </Text>
-          <Text style={styles.scoreMax}>/ 10</Text>
+        {/* Safety Scores Section */}
+        <View style={styles.scoresSection}>
+          {/* Overall Safety Score - Emphasized */}
+          <View style={styles.overallScoreSection}>
+            <View style={[styles.lineIndicator, { backgroundColor: lineColor }]} />
+            <Text style={styles.overallScoreLabel}>Overall Safety Score</Text>
+            <Text style={[styles.overallScore, { color: getScoreColor(station.overallScore) }]}>
+              {station.overallScore}
+            </Text>
+            <Text style={styles.overallScoreMax}>/ 10</Text>
+          </View>
+
+          {/* Individual Scores */}
+          <View style={styles.individualScoresContainer}>
+            <View style={styles.scoreCard}>
+              <Text style={styles.scoreCardLabel}>
+                Busyness Score {mlBusynessScore !== null ? '(ML)' : ''}
+              </Text>
+              {isLoadingMlScores ? (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingText}>Loading...</Text>
+                </View>
+              ) : (
+                <>
+                  <Text style={[styles.scoreCardValue, { color: getScoreColor(mlBusynessScore || station.busynessScore) }]}>
+                    {mlBusynessScore || station.busynessScore}
+                  </Text>
+                  <Text style={styles.scoreCardMax}>/ 10</Text>
+                </>
+              )}
+            </View>
+
+            <View style={styles.scoreCard}>
+              <Text style={styles.scoreCardLabel}>Crime Score</Text>
+              <Text style={[styles.scoreCardValue, { color: getScoreColor(station.crimeScore) }]}>
+                {station.crimeScore}
+              </Text>
+              <Text style={styles.scoreCardMax}>/ 10</Text>
+            </View>
+          </View>
         </View>
 
         <TrainArrivals stationId={station.id} lineColor={lineColor} />
@@ -261,13 +319,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#1C1C1E",
   },
-  scoreSection: {
-    alignItems: "center",
-    paddingVertical: 32,
+  scoresSection: {
     backgroundColor: "#2C2C2E",
     marginHorizontal: 20,
     marginTop: 20,
     borderRadius: 16,
+    padding: 20,
+  },
+  overallScoreSection: {
+    alignItems: "center",
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: "#3A3A3C",
+    marginBottom: 20,
   },
   lineIndicator: {
     width: 40,
@@ -275,19 +339,47 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 16,
   },
-  scoreLabel: {
-    fontSize: 16,
-    color: "#8E8E93",
+  overallScoreLabel: {
+    fontSize: 18,
+    color: "#FFFFFF",
+    fontWeight: "600",
     marginBottom: 8,
   },
-  score: {
-    fontSize: 64,
+  overallScore: {
+    fontSize: 72,
     fontWeight: "bold",
   },
-  scoreMax: {
-    fontSize: 20,
+  overallScoreMax: {
+    fontSize: 24,
     color: "#8E8E93",
     marginTop: -8,
+  },
+  individualScoresContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  scoreCard: {
+    flex: 1,
+    backgroundColor: "#1C1C1E",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+  },
+  scoreCardLabel: {
+    fontSize: 14,
+    color: "#8E8E93",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  scoreCardValue: {
+    fontSize: 36,
+    fontWeight: "bold",
+  },
+  scoreCardMax: {
+    fontSize: 14,
+    color: "#8E8E93",
+    marginTop: -4,
   },
   metricsSection: {
     marginTop: 24,
@@ -397,5 +489,15 @@ const styles = StyleSheet.create({
   routeTagText: {
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+  },
+  loadingText: {
+    color: '#8E8E93',
+    fontSize: 12,
+    fontStyle: 'italic',
   },
 });

@@ -57,6 +57,30 @@ class MLTrafficService {
   }
 
   /**
+   * Normalize station name to match ML predictions format
+   */
+  private normalizeStationName(stationName: string): string[] {
+    // Return multiple possible variations to try
+    const variations = [
+      // Original name
+      stationName,
+      
+      // Remove cross street numbers (e.g., "103 St-110 St" -> "103 St")
+      stationName.replace(/\s*-\s*\d+\s*St.*$/, ' St'),
+      
+      // Remove everything after first dash
+      stationName.split('-')[0].trim(),
+      
+      // Handle specific patterns
+      stationName.replace(/\s*-\s*\d+\s*St\s*$/, ' St'), // Remove trailing street numbers
+      stationName.replace(/\s*-\s*\w+\s*St\s*$/, ' St'), // Remove trailing word + St
+    ];
+
+    // Return unique, non-empty variations
+    return [...new Set(variations.filter(v => v && v.trim().length > 0))];
+  }
+
+  /**
    * Get current traffic prediction for a station
    */
   async getCurrentTrafficPrediction(stationName: string): Promise<number | null> {
@@ -72,13 +96,34 @@ class MLTrafficService {
     const hour = now.getHours();
     const month = now.getMonth() + 1; // Convert 0-11 to 1-12
 
-    // Find matching prediction
-    const prediction = this.predictions.find(p => 
+    // Try exact match first
+    let prediction = this.predictions.find(p => 
       p.station === stationName &&
       p.dotw === dotw &&
       p.hour === hour &&
       p.month === month
     );
+
+    // If no exact match, try all name variations
+    if (!prediction) {
+      const nameVariations = this.normalizeStationName(stationName);
+      console.log(`🔄 Trying ${nameVariations.length} name variations for "${stationName}":`);
+      
+      for (const variation of nameVariations) {
+        console.log(`   Trying: "${variation}"`);
+        prediction = this.predictions.find(p => 
+          p.station === variation &&
+          p.dotw === dotw &&
+          p.hour === hour &&
+          p.month === month
+        );
+        
+        if (prediction) {
+          console.log(`   ✅ Found match with "${variation}"`);
+          break;
+        }
+      }
+    }
 
     if (prediction) {
       console.log(`📊 ML prediction for ${stationName}: ${prediction.predicted_traffic.toFixed(1)} traffic`);
@@ -214,6 +259,52 @@ class MLTrafficService {
       uniqueStations,
       isLoaded: this.isLoaded
     };
+  }
+
+  /**
+   * Convert busyness level to numeric score (1-10)
+   * Higher traffic = lower score (more dangerous due to crowding)
+   */
+  getBusynessScore(stationName: string): Promise<number | null> {
+    return new Promise(async (resolve) => {
+      try {
+        const busynessData = await this.getCurrentBusyness(stationName);
+        
+        if (!busynessData.isMLData || !busynessData.busynessLevel) {
+          resolve(null);
+          return;
+        }
+
+        // Convert category to score (1-10 scale)
+        // Average traffic = highest safety score (10), extremes = lower scores
+        let score: number;
+        switch (busynessData.busynessLevel.category) {
+          case 'Extremely Low':
+            score = 7; // Lower safety - too empty can be unsafe
+            break;
+          case 'Low':
+            score = 8; // Good safety
+            break;
+          case 'Average':
+            score = 10; // Best safety - optimal traffic level
+            break;
+          case 'High':
+            score = 8; // Good safety
+            break;
+          case 'Extremely High':
+            score = 6; // Lower safety - too crowded
+            break;
+          default:
+            score = 10; // Default to average (best)
+        }
+
+        console.log(`📊 ML Busyness Score for ${stationName}: ${score}/10 (${busynessData.busynessLevel.category})`);
+        resolve(score);
+      } catch (error) {
+        console.error(`❌ Error getting busyness score for ${stationName}:`, error);
+        resolve(null);
+      }
+    });
   }
 
   /**

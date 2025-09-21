@@ -1,78 +1,58 @@
-# SubwaySense 🚇
+# SubwaySense MTA App
 
-A comprehensive NYC Subway safety and navigation app built with React Native and Expo. SubwaySense provides real-time subway information, safety metrics, and location-based services to help commuters navigate the NYC subway system safely and efficiently.
+A comprehensive NYC Subway safety and real-time information app built with React Native and Expo. SubwaySense provides users with safety scores, live train arrivals, AI-powered safety alerts, and ML traffic predictions to help navigate the NYC subway system safely and efficiently.
 
-## 🌟 Features
+## 🚇 Features
 
 ### 🗺️ Interactive Subway Map
-- **High-resolution NYC Subway Map**: Zoomable and scrollable subway map
-- **Zoom Controls**: Pinch-to-zoom and dedicated zoom buttons
-- **Location Integration**: Find your closest subway station using GPS
-- **Real-time Updates**: Live connection status and data freshness indicators
+- **Zoomable NYC Subway Map** with full pan and zoom controls
+- **Location-based closest station finder** using GPS coordinates
+- **Real-time station data** from Transiter API
+- **Comprehensive station coverage** across all NYC subway lines
 
-### 🚂 Real-time Train Information
-- **Live Arrivals**: Real-time train arrival times and delays
-- **Service Alerts**: Current service disruptions and delays
-- **Line Information**: Detailed information for all NYC subway lines
-- **Station Details**: Comprehensive station information and safety metrics
+### 🛡️ Safety Intelligence
+- **AI-Powered Safety Alerts** via Flask backend with 24-hour incident history
+- **ML Traffic Predictions** showing station busyness levels
+- **Safety Scoring System** with detailed metrics for each station
+- **Real-time incident monitoring** using web scraping and AI analysis
 
-### 🛡️ Safety Features
-- **Safety Scoring**: Overall safety scores for each station (1-10 scale)
-- **Safety Metrics**: Detailed metrics including lighting, cameras, incidents, and traffic
-- **Live Station Status**: Real-time crowding levels and equipment status
-- **Safety Alerts**: Priority-based safety notifications and warnings
+### 📍 Live Transit Information
+- **Real-time Train Arrivals** from Transiter API
+- **Live Station Status** with crowding and facility information
+- **Service Alerts** for delays and disruptions
+- **Comprehensive Route Information** for all subway lines
 
-### 📍 Location Services
-- **GPS Integration**: Automatic location detection
-- **Closest Station Finder**: Haversine formula-based distance calculations
-- **Station Coordinates**: Comprehensive database of NYC subway station locations
-- **Permission Handling**: Graceful location permission management
+### 🎯 User Experience
+- **Dark Theme UI** optimized for subway use
+- **Intuitive Navigation** between map, lines, and station details
+- **Search Functionality** to quickly find stations
+- **Offline Support** with cached data fallbacks
 
 ## 🏗️ Architecture
 
-### Tech Stack
-- **React Native**: Cross-platform mobile development
-- **Expo**: Development platform and build tools
-- **TypeScript**: Type-safe JavaScript development
-- **React Query**: Data fetching and caching
-- **Expo Router**: File-based navigation
-- **React Context**: State management
-- **AsyncStorage**: Local data persistence
+### Frontend (React Native + Expo)
+- **React Native** with TypeScript for type safety
+- **Expo Router** for navigation
+- **Context API** for global state management
+- **React Query** for data fetching and caching
 
-### Project Structure
-```
-├── app/                    # Expo Router pages
-│   ├── index.tsx          # Home screen with subway map
-│   ├── lines.tsx          # Subway lines overview
-│   ├── stations.tsx       # Stations list
-│   └── station-detail.tsx # Individual station details
-├── components/            # Reusable UI components
-│   ├── LiveStationStatus.tsx
-│   ├── SafetyAlerts.tsx
-│   ├── ServiceAlerts.tsx
-│   ├── TrainArrivals.tsx
-│   └── LocationMarker.tsx
-├── contexts/              # React Context providers
-│   ├── LocationContext.tsx
-│   └── RealTimeContext.tsx
-├── services/              # API and data services
-│   └── mtaRealTimeService.ts
-├── utils/                 # Utility functions
-│   └── stationUtils.ts
-├── types/                 # TypeScript type definitions
-│   └── mta.ts
-└── constants/             # Static data
-    └── mtaData.ts
-```
+### Backend Services
+- **Transiter API** for real-time transit data
+- **Flask Server** for AI-powered safety analysis
+- **ML Traffic Service** for busyness predictions
+
+### Data Sources
+- **Transiter Demo API** (`demo.transiter.dev`) for live transit data
+- **ML Predictions** from pre-calculated JSON data
+- **AI Research Agent** for safety incident analysis
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18 or higher)
+- Node.js 18+ 
 - npm or yarn
 - Expo CLI
-- iOS Simulator (for iOS development)
-- Android Studio (for Android development)
+- iOS Simulator or Android Emulator (for development)
 
 ### Installation
 
@@ -91,189 +71,194 @@ A comprehensive NYC Subway safety and navigation app built with React Native and
 
 3. **Start the development server**
    ```bash
-   npm start
-   # or
-   yarn start
+   npx expo start
    ```
 
-4. **Run on specific platforms**
+4. **Run on device/simulator**
    ```bash
    # iOS
-   npm run ios
+   npx expo start --ios
    
    # Android
-   npm run android
-   
-   # Web
-   npm run start-web
+   npx expo start --android
    ```
 
-### Development Commands
+### Flask Backend Setup (Optional)
 
-```bash
-# Start development server
-npm start
+The app integrates with a Flask backend for AI-powered safety alerts:
 
-# Run on iOS simulator
-npm run ios
+1. **Navigate to Flask directory**
+   ```bash
+   cd subway_sense
+   ```
 
-# Run on Android emulator
-npm run android
+2. **Install Python dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-# Run on web browser
-npm run start-web
+3. **Start Flask server**
+   ```bash
+   python app.py
+   ```
 
-# Lint code
-npm run lint
+The Flask server runs on `http://localhost:4500` and provides safety incident analysis.
+
+## 📱 App Structure
+
 ```
-
-## 📱 App Screens
-
-### 🏠 Home Screen
-- Interactive NYC Subway map
-- Zoom controls and navigation
-- Location button to find closest station
-- Real-time connection status
-- Closest station information
-
-### 🚇 Lines Screen
-- Overview of all NYC subway lines
-- Color-coded line indicators
-- Safety scores and metrics
-- Navigation to individual lines
-
-### 🚉 Stations Screen
-- List of all subway stations
-- Search and filter functionality
-- Safety scores and ratings
-- Quick access to station details
-
-### 📊 Station Detail Screen
-- Comprehensive station information
-- Real-time train arrivals
-- Live station status
-- Safety alerts and notifications
-- Detailed safety metrics
+├── app/                          # Expo Router pages
+│   ├── _layout.tsx              # Root layout with providers
+│   ├── index.tsx                # Home screen with subway map
+│   ├── lines.tsx                # Subway lines list
+│   ├── stations.tsx             # Station list for a line
+│   └── station-detail.tsx       # Individual station details
+├── components/                   # Reusable UI components
+│   ├── LiveStationStatus.tsx    # Live station information
+│   ├── SafetyAlerts.tsx         # AI-powered safety alerts
+│   ├── TrainArrivals.tsx        # Real-time train arrivals
+│   └── ServiceAlerts.tsx        # MTA service alerts
+├── contexts/                     # React Context providers
+│   ├── RealTimeContext.tsx      # Real-time data management
+│   └── LocationContext.tsx      # Location services
+├── services/                     # API and data services
+│   ├── transiterRouteService.ts  # Transiter routes API
+│   ├── transiterStationService.ts # Transiter stations API
+│   ├── flaskSafetyService.ts    # Flask safety alerts API
+│   ├── mlTrafficService.ts      # ML traffic predictions
+│   └── mtaRealTimeService.ts    # MTA real-time data
+├── types/                        # TypeScript type definitions
+│   └── mta.ts                   # MTA data types
+├── utils/                        # Utility functions
+│   └── stationUtils.ts          # Station utilities
+└── subway_sense/                 # Flask backend
+    ├── app.py                   # Flask application
+    ├── agent.py                 # AI research agent
+    └── requirements.txt         # Python dependencies
+```
 
 ## 🔧 Configuration
 
 ### Location Permissions
-The app requires location permissions to provide location-based services. Permissions are configured in:
+The app requires location permissions for the closest station feature:
 
-- `app.json`: Expo configuration
-- `ios/SafeRouteMTAAppClone/Info.plist`: iOS-specific permissions
+**iOS** (`ios/SafeRouteMTAAppClone/Info.plist`):
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to location to show your position on the subway map.</string>
+```
 
-### Environment Variables
-No environment variables are required for basic functionality. The app uses mock data for demonstration purposes.
+**Android** (handled by Expo):
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "This app needs access to location to show your position on the subway map."
+        }
+      ]
+    ]
+  }
+}
+```
 
-## 📊 Data Sources
+### API Endpoints
 
-### Mock Data
-The app currently uses comprehensive mock data including:
-- **Station Information**: Names, IDs, safety scores, and metrics
-- **Train Arrivals**: Simulated arrival times and delays
-- **Service Alerts**: Sample alerts with different severity levels
-- **Station Status**: Mock crowding levels and equipment status
+- **Transiter API**: `https://demo.transiter.dev/systems/us-ny-subway`
+- **Flask Safety API**: `http://localhost:4500/research`
+- **ML Predictions**: Local JSON file (`assets/ml_traffic_predictions.json`)
 
-### Real-time Integration
-The app is designed to integrate with:
-- **MTA GTFS Realtime API**: For live train data
-- **MTA Service Alerts API**: For current service disruptions
-- **Location Services**: GPS-based station finding
+## 📊 Data Flow
 
-## 🎨 Design System
+### Real-time Data Pipeline
+1. **Transiter API** provides live train arrivals and station data
+2. **ML Service** processes traffic predictions from JSON data
+3. **Flask Backend** analyzes safety incidents using AI agents
+4. **React Query** manages caching and data synchronization
+5. **Context Providers** distribute data to components
 
-### Color Palette
-- **Primary**: Dark theme with `#1C1C1E` backgrounds
-- **Secondary**: `#2C2C2E` for cards and components
-- **Accent**: `#007AFF` for interactive elements
-- **Success**: `#34C759` for positive states
-- **Warning**: `#FF9500` for medium priority
-- **Error**: `#FF3B30` for high priority alerts
+### Safety Alert System
+1. **Station Name** sent to Flask backend
+2. **AI Research Agent** searches for recent incidents
+3. **Analysis** categorizes incidents by severity
+4. **Real-time Updates** displayed in Safety Alerts component
 
-### Typography
-- **Headers**: 18-24px, bold weights
-- **Body**: 14-16px, regular weights
-- **Captions**: 12px, medium weights
-- **System Font**: SF Pro (iOS) / Roboto (Android)
+## 🎨 UI/UX Features
+
+### Design System
+- **Dark Theme** optimized for subway environments
+- **Color-coded Lines** matching official MTA colors
+- **Accessibility** support with proper contrast ratios
+- **Responsive Design** for various screen sizes
+
+### Navigation
+- **Tab-based Navigation** between main sections
+- **Deep Linking** support for station details
+- **Gesture Support** for map interactions
+- **Search Functionality** with real-time filtering
 
 ## 🧪 Testing
 
-### Manual Testing
-- Test on both iOS and Android devices
-- Verify location permissions and GPS functionality
-- Test offline functionality and data persistence
-- Validate all navigation flows and user interactions
-
-### Development Testing
+### Type Checking
 ```bash
-# Run TypeScript type checking
 npx tsc --noEmit
-
-# Run ESLint
-npm run lint
 ```
 
-## 📦 Building for Production
-
-### iOS
+### Linting
 ```bash
-# Build for iOS
-expo build:ios
+npx eslint .
 ```
 
-### Android
-```bash
-# Build for Android
-expo build:android
-```
+### Manual Testing
+- Test location permissions on device
+- Verify Transiter API connectivity
+- Test Flask backend integration
+- Validate ML predictions display
 
-### Web
+## 🚀 Deployment
+
+### iOS App Store
+1. Build production bundle: `npx expo build:ios`
+2. Submit via App Store Connect
+
+### Google Play Store
+1. Build production bundle: `npx expo build:android`
+2. Submit via Google Play Console
+
+### Web Deployment
 ```bash
-# Build for web
-expo build:web
+npx expo export:web
+# Deploy dist/ folder to your hosting service
 ```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Commit changes: `git commit -am 'Add new feature'`
+4. Push to branch: `git push origin feature/new-feature`
+5. Submit a pull request
 
-### Code Style
-- Use TypeScript for type safety
-- Follow React Native best practices
-- Use functional components with hooks
-- Implement proper error handling
-- Add comprehensive comments for complex logic
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
-- **MTA and NYCOpenData**: For providing the NYC Subway system and data
-- **Expo**: For the excellent development platform
-- **React Native Community**: For the robust ecosystem
-- **NYC Subway Riders**: For inspiration and feedback
-- **NYPD and New York Post**: For their timely updates.
+- **Transiter** for providing comprehensive transit data APIs
+- **MTA** for official subway system information
+- **Expo** for the excellent React Native development platform
+- **OpenAI** for AI capabilities in the safety analysis system
 
 ## 📞 Support
 
-For support, questions, or feature requests, please:
-- Open an issue on GitHub
-- Contact the development team
-- Check the documentation for common solutions
-
-## 🔮 Future Enhancements
-
-- **Real-time Data Integration**: Connect to live MTA APIs
-- **Offline Mode**: Enhanced offline functionality
-- **Push Notifications**: Real-time alerts and updates
-- **Accessibility**: Enhanced accessibility features
-- **Multi-language Support**: Internationalization
-- **Social Features**: Community reporting and feedback
+For support or questions:
+- Create an issue in the GitHub repository
+- Check the documentation in the `/docs` folder
+- Review the component examples in `/components`
 
 ---
 
-**SubwaySense** - Making NYC Subway navigation safer and smarter! 🚇✨
-
+**SubwaySense MTA App** - Making NYC subway navigation safer and smarter! 🚇✨
