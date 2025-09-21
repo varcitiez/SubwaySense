@@ -100,7 +100,6 @@ export default function HomeScreen() {
           onPress={handleSafetyPress}
           testID="safety-button"
         >
-          <Text style={styles.cautionIcon}>⚠️</Text>
           <Text style={styles.safetyButtonText}>View Lines</Text>
         </TouchableOpacity>
       </View>
@@ -217,9 +216,9 @@ const styles = StyleSheet.create({
   safetyButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 40,
+    paddingVertical: 15,
     borderRadius: 20,
     shadowColor: "#FF3B30",
     shadowOffset: { width: 0, height: 2 },
@@ -233,9 +232,9 @@ const styles = StyleSheet.create({
   },
   safetyButtonText: {
     color: "#FFFFFF",
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: "600",
-    marginLeft: 4,
+    marginLeft: 3,
   },
   zoomControls: {
     position: "absolute",

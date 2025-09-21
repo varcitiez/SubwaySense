@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRealTime } from '@/contexts/RealTimeContext';
+import { transiterStationService } from '@/services/transiterStationService';
 import type { TrainArrival } from '@/types/mta';
 
 interface TrainArrivalsProps {
@@ -18,11 +19,30 @@ export function TrainArrivals({ stationId, lineColor }: TrainArrivalsProps) {
   const fetchArrivals = async () => {
     setIsLoading(true);
     try {
-      const data = await getStationArrivals(stationId);
-      setArrivals(data);
+      // Try to get real-time data from Transiter first
+      console.log(`🚇 Attempting to fetch real-time arrivals for ${stationId}...`);
+      const transiterData = await transiterStationService.getStationData(stationId);
+      
+      if (transiterData && transiterData.realTimeArrivals.length > 0) {
+        console.log(`✅ Found ${transiterData.realTimeArrivals.length} real-time arrivals from Transiter`);
+        setArrivals(transiterData.realTimeArrivals);
+      } else {
+        console.log(`⚠️ No Transiter data, falling back to mock data`);
+        const data = await getStationArrivals(stationId);
+        setArrivals(data);
+      }
+      
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Failed to fetch arrivals:', error);
+      // Fallback to mock data
+      try {
+        const data = await getStationArrivals(stationId);
+        setArrivals(data);
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        setArrivals([]);
+      }
     } finally {
       setIsLoading(false);
     }

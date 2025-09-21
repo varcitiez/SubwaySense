@@ -2,19 +2,54 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRealTime } from '@/contexts/RealTimeContext';
+import { flaskSafetyService } from '@/services/flaskSafetyService';
 import type { ServiceAlert } from '@/types/mta';
 
 interface SafetyAlertsProps {
   stationId?: string;
   lineIcons?: string[];
+  stationName?: string;
 }
 
-export function SafetyAlertsComponent({ stationId, lineIcons }: SafetyAlertsProps) {
+export function SafetyAlertsComponent({ stationId, lineIcons, stationName }: SafetyAlertsProps) {
   const { serviceAlerts, isLoading } = useRealTime();
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [flaskAlerts, setFlaskAlerts] = useState<ServiceAlert[]>([]);
+  const [flaskLoading, setFlaskLoading] = useState<boolean>(false);
+  const [flaskError, setFlaskError] = useState<string | null>(null);
+
+  // Fetch Flask safety alerts when station name changes
+  useEffect(() => {
+    const fetchFlaskAlerts = async () => {
+      if (!stationName) return;
+
+      setFlaskLoading(true);
+      setFlaskError(null);
+      
+      try {
+        const alerts = await flaskSafetyService.getSafetyAlerts(stationName);
+        setFlaskAlerts(alerts);
+        console.log(`🚨 Flask returned ${alerts.length} safety alerts for ${stationName}`);
+      } catch (error) {
+        console.error('❌ Failed to fetch Flask safety alerts:', error);
+        setFlaskError('Failed to load safety alerts from server');
+        setFlaskAlerts([]);
+      } finally {
+        setFlaskLoading(false);
+      }
+    };
+
+    fetchFlaskAlerts();
+  }, [stationName]);
+
+  // Combine Flask alerts with regular service alerts
+  const allAlerts = [...flaskAlerts, ...serviceAlerts];
 
   // Filter alerts based on station or line relevance
-  const relevantAlerts = serviceAlerts.filter(alert => {
+  const relevantAlerts = allAlerts.filter(alert => {
+    // Flask alerts are always relevant (they're station-specific)
+    if (alert.id.startsWith('flask-')) return true;
+    
     // If no specific station/line filtering, show all alerts
     if (!stationId && !lineIcons) return true;
     
@@ -66,7 +101,7 @@ export function SafetyAlertsComponent({ stationId, lineIcons }: SafetyAlertsProp
     return `${diffDays}d ago`;
   };
 
-  if (isLoading) {
+  if (isLoading || flaskLoading) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -76,7 +111,9 @@ export function SafetyAlertsComponent({ stationId, lineIcons }: SafetyAlertsProp
             <Text style={styles.badgeText}>Loading...</Text>
           </View>
         </View>
-        <Text style={styles.loadingText}>Loading safety information...</Text>
+        <Text style={styles.loadingText}>
+          {flaskLoading ? 'Fetching safety data from server...' : 'Loading safety information...'}
+        </Text>
       </View>
     );
   }
@@ -103,6 +140,13 @@ export function SafetyAlertsComponent({ stationId, lineIcons }: SafetyAlertsProp
           )}
         </TouchableOpacity>
       </View>
+
+      {flaskError && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>⚠️ {flaskError}</Text>
+          <Text style={styles.errorSubtext}>Showing cached data only</Text>
+        </View>
+      )}
 
       {activeAlerts.length === 0 ? (
         <View style={styles.noAlertsContainer}>
@@ -310,5 +354,22 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '500',
+  },
+  errorContainer: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  errorText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  errorSubtext: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    marginTop: 4,
+    opacity: 0.8,
   },
 });

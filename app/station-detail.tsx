@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,17 +13,42 @@ import { TrainArrivals } from "@/components/TrainArrivals";
 import { LiveStationStatusComponent } from "@/components/LiveStationStatus";
 import { SafetyAlertsComponent } from "@/components/SafetyAlerts";
 import { useRealTime } from "@/contexts/RealTimeContext";
+import { transiterStationService } from "@/services/transiterStationService";
 import type { Station } from "@/types/mta";
 
 export default function StationDetailScreen() {
   const params = useLocalSearchParams();
   const { refreshData, isLoading, isOnline } = useRealTime();
+  const [enhancedStationData, setEnhancedStationData] = useState<any>(null);
+  const [isLoadingEnhanced, setIsLoadingEnhanced] = useState<boolean>(false);
   
   const station: Station = params.station 
     ? JSON.parse(params.station as string) 
     : null;
   const lineColor = params.lineColor as string;
   const lineIcons = params.lineIcons ? JSON.parse(params.lineIcons as string) : [];
+
+  // Fetch enhanced station data from Transiter
+  useEffect(() => {
+    const fetchEnhancedData = async () => {
+      if (!station?.id) return;
+      
+      setIsLoadingEnhanced(true);
+      try {
+        console.log(`🔍 Fetching enhanced data for station ${station.id}...`);
+        const data = await transiterStationService.getStationData(station.id);
+        setEnhancedStationData(data);
+        console.log(`✅ Enhanced data loaded:`, data ? 'Yes' : 'No');
+      } catch (error) {
+        console.error('❌ Failed to fetch enhanced station data:', error);
+        setEnhancedStationData(null);
+      } finally {
+        setIsLoadingEnhanced(false);
+      }
+    };
+
+    fetchEnhancedData();
+  }, [station?.id]);
 
   if (!station) {
     return (
@@ -115,7 +140,85 @@ export default function StationDetailScreen() {
         
         <LiveStationStatusComponent stationId={station.id} lineIcons={lineIcons} />
         
-        <SafetyAlertsComponent stationId={station.id} lineIcons={lineIcons} />
+        <SafetyAlertsComponent 
+          stationId={station.id} 
+          lineIcons={lineIcons} 
+          stationName={station.stationName}
+        />
+
+        {/* Enhanced Station Information */}
+        {enhancedStationData && (
+          <View style={styles.enhancedSection}>
+            <Text style={styles.sectionTitle}>Station Details</Text>
+            
+            {/* Coordinates */}
+            {enhancedStationData.coordinates && (
+              <View style={styles.infoItem}>
+                <View style={styles.infoLeft}>
+                  <Ionicons name="location-outline" color="#8E8E93" size={20} />
+                  <Text style={styles.infoLabel}>Coordinates</Text>
+                </View>
+                <Text style={styles.infoValue}>
+                  {enhancedStationData.coordinates.latitude.toFixed(6)}, {enhancedStationData.coordinates.longitude.toFixed(6)}
+                </Text>
+              </View>
+            )}
+
+            {/* Routes */}
+            {enhancedStationData.routes && enhancedStationData.routes.length > 0 && (
+              <View style={styles.infoItem}>
+                <View style={styles.infoLeft}>
+                  <Ionicons name="train-outline" color="#8E8E93" size={20} />
+                  <Text style={styles.infoLabel}>Routes</Text>
+                </View>
+                <View style={styles.routeTags}>
+                  {enhancedStationData.routes.map((route: string) => (
+                    <View 
+                      key={route} 
+                      style={[
+                        styles.routeTag, 
+                        { backgroundColor: enhancedStationData.routeColors[route] || '#8E8E93' }
+                      ]}
+                    >
+                      <Text style={[
+                        styles.routeTagText,
+                        { color: route === 'L' ? '#000000' : '#FFFFFF' }
+                      ]}>
+                        {route}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Transfers */}
+            {enhancedStationData.transfers && enhancedStationData.transfers.length > 0 && (
+              <View style={styles.infoItem}>
+                <View style={styles.infoLeft}>
+                  <Ionicons name="swap-horizontal-outline" color="#8E8E93" size={20} />
+                  <Text style={styles.infoLabel}>Transfers</Text>
+                </View>
+                <Text style={styles.infoValue}>
+                  {enhancedStationData.transfers.join(', ')}
+                </Text>
+              </View>
+            )}
+
+            {/* Platforms */}
+            {enhancedStationData.platforms && enhancedStationData.platforms.length > 0 && (
+              <View style={styles.infoItem}>
+                <View style={styles.infoLeft}>
+                  <Ionicons name="layers-outline" color="#8E8E93" size={20} />
+                  <Text style={styles.infoLabel}>Platforms</Text>
+                </View>
+                <Text style={styles.infoValue}>
+                  {enhancedStationData.platforms.join(', ')}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         <View style={styles.metricsSection}>
           <Text style={styles.sectionTitle}>Safety Metrics</Text>
@@ -264,5 +367,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-
+  enhancedSection: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  infoLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  routeTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  routeTag: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    minWidth: 32,
+    alignItems: 'center',
+  },
+  routeTagText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
 });

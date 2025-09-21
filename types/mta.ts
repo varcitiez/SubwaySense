@@ -41,6 +41,10 @@ export interface Station {
   metrics: Metrics;
   arrivals?: TrainArrival[];
   liveStatus?: LiveStationStatus;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export interface Line {
